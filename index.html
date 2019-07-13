@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Serverless cost estimator</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Rubik&display=swap" rel="stylesheet">
+    <style>
+        h1, h2 {
+            font-family: 'Rubik', sans-serif;
+        }
+        .font-sans {
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-grey-lighter font-sans">
+
+    <div id="app" class="container mx-auto my-4 px-4 max-w-lg">
+
+        <h1 class="my-8 text-3xl sm:text-4xl">Serverless costs calculator</h1>
+
+        <h2 class="my-4 text-xl">Presets</h2>
+        <div class="my-8 flex flex-wrap">
+            <button class="sm:flex-auto bg-indigo-500 hover:bg-indigo-400 text-white py-1 px-2 m-1 ml-0 border-b-4 border-indigo-700 hover:border-indigo-500 rounded" @click="loadSmallAPI()">Small API</button>
+            <button class="sm:flex-auto bg-indigo-500 hover:bg-indigo-400 text-white py-1 px-2 m-1 border-b-4 border-indigo-700 hover:border-indigo-500 rounded" @click="loadLargeAPI()">Large API</button>
+            <button class="sm:flex-auto bg-indigo-500 hover:bg-indigo-400 text-white py-1 px-2 m-1 border-b-4 border-indigo-700 hover:border-indigo-500 rounded" @click="loadSmallWebsite()">Small website</button>
+            <button class="sm:flex-auto bg-indigo-500 hover:bg-indigo-400 text-white py-1 px-2 m-1 mr-0 border-b-4 border-indigo-700 hover:border-indigo-500 rounded" @click="loadLargeWebsite()">Large website</button>
+        </div>
+
+        <h2 class="my-4 text-xl">Backend (assets excluded)</h2>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/2">
+                <label class="block text-gray-600 md:text-right pr-4" for="requestsPerMonth">
+                    HTTP requests per month
+                </label>
+            </div>
+            <div class="md:w-1/2">
+                <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500" id="requestsPerMonth" type="number" v-model="requestsPerMonth">
+            </div>
+        </div>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/2">
+                <label class="block text-gray-600 md:text-right pr-4" for="averageExecutionTime">
+                    Average execution time (ms)
+                </label>
+            </div>
+            <div class="md:w-1/2">
+                <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500" id="averageExecutionTime" type="number" v-model="averageExecutionTime">
+            </div>
+        </div>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/2">
+                <label class="block text-gray-600 md:text-right pr-4" for="averageResponseSizeInKb">
+                    Average response size (Kb)
+                </label>
+            </div>
+            <div class="md:w-1/2">
+                <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500" id="averageResponseSizeInKb" type="number" v-model="averageResponseSizeInKb">
+            </div>
+        </div>
+
+        <h2 class="my-4 text-xl">Assets</h2>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/2">
+                <label class="block text-gray-600 md:text-right pr-4" for="assetsCount">
+                    Average number of assets (CSS, JS, images…) per page
+                </label>
+            </div>
+            <div class="md:w-1/2">
+                <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500" id="assetsCount" type="number" v-model="assetsCount">
+            </div>
+        </div>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/2">
+                <label class="block text-gray-600 md:text-right pr-4" for="assetsTotalSizeInKb">
+                    Total assets size per page (Kb)
+                </label>
+            </div>
+            <div class="md:w-1/2">
+                <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500" id="assetsTotalSizeInKb" type="number" v-model="assetsTotalSizeInKb">
+            </div>
+        </div>
+
+        <h2 class="my-4 text-xl">Monthly cost</h2>
+        <p class="p-1 text-gray-700">
+            AWS Lambda
+            <span class="float-right">${{ lambdaTotal.toFixed(2) }}</span>
+        </p>
+        <p class="p-1 text-gray-700">
+            API Gateway
+            <span class="float-right">${{ apiGatewayTotal.toFixed(2) }}</span>
+        </p>
+        <p class="p-1 text-gray-700">
+            AWS S3
+            <span class="float-right">${{ s3Total.toFixed(2) }}</span>
+        </p>
+        <p class="p-1 text-gray-700">
+            CloudFront
+            <span class="float-right">${{ cloudFrontTotal.toFixed(2) }}</span>
+        </p>
+        <p class="my-5 p-4 text-xl uppercase border-b border-b-2 border-indigo-500 bg-gray-100 text-gray-700">
+            Total
+            <span class="float-right font-bold">${{ total.toFixed(2) }}</span>
+        </p>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/moment.min.js"></script>
+    <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                requestsPerMonth: 5000000.,
+                averageExecutionTime: 300.,
+                averageResponseSizeInKb: 3.,
+                assetsCount: 5.,
+                assetsTotalSizeInKb: 200.,
+
+                lambdaCostPerRequest: 0.0000002,
+                lambdaCostPer100ms: 0.000001667,
+
+                apiGatewayCostPerMillion: 3.5,
+                apiGatewayDataTransferCostPerGb: 0.09,
+
+                s3CostPer1000: 0.0004,
+
+                cloudFrontCostPer10000: 0.01,
+                cloudFrontDataTransferCostPerGb: 0.085 + 0.02,
+
+                lambdaTotal: 0,
+                apiGatewayTotal: 0,
+                s3Total: 0,
+                cloudFrontTotal: 0,
+                total: 0,
+            },
+            created: function () {
+                this.loadSmallWebsite();
+                this.recalculate();
+            },
+            methods: {
+                recalculate: function () {
+                    const pagesLoadedPerMonth = this.requestsPerMonth / 2;
+                    const billedAverageExecutionTime = Math.max(100., this.averageExecutionTime);
+
+                    const lambdaRequestsCost = this.requestsPerMonth * this.lambdaCostPerRequest;
+                    const lambdaTimeCost = this.requestsPerMonth * billedAverageExecutionTime * this.lambdaCostPer100ms / 100.;
+                    this.lambdaTotal = lambdaRequestsCost + lambdaTimeCost;
+
+                    const apiGatewayInvocationCosts = this.requestsPerMonth * this.apiGatewayCostPerMillion / 1000000.;
+                    const apiGatewayDataTransferCosts = this.requestsPerMonth * this.averageResponseSizeInKb * this.apiGatewayDataTransferCostPerGb / 1024. / 1024.;
+                    this.apiGatewayTotal = apiGatewayInvocationCosts + apiGatewayDataTransferCosts;
+
+                    const s3InvocationCosts = pagesLoadedPerMonth * this.assetsCount * this.s3CostPer1000 / 1000.;
+                    this.s3Total = s3InvocationCosts;
+
+                    const cloudFrontPHPInvocationCosts = this.requestsPerMonth * this.cloudFrontCostPer10000 / 10000.;
+                    const cloudFrontPHPDataTransferCosts = this.requestsPerMonth * this.averageResponseSizeInKb * this.cloudFrontDataTransferCostPerGb / 1024. / 1024.;
+                    const cloudFrontAssetsInvocationCosts = pagesLoadedPerMonth * this.assetsCount * this.cloudFrontCostPer10000 / 10000.;
+                    const cloudFrontAssetsDataTransferCosts = pagesLoadedPerMonth * this.assetsTotalSizeInKb * this.cloudFrontDataTransferCostPerGb / 1024. / 1024.;
+                    this.cloudFrontTotal = cloudFrontPHPInvocationCosts + cloudFrontPHPDataTransferCosts
+                        + cloudFrontAssetsInvocationCosts + cloudFrontAssetsDataTransferCosts;
+
+                    this.total = this.lambdaTotal + this.apiGatewayTotal + this.cloudFrontTotal;
+                },
+                loadSmallAPI: function() {
+                    this.requestsPerMonth = 3000.;
+                    this.averageExecutionTime = 100.;
+                    this.averageResponseSizeInKb = 0.3;
+                    this.assetsCount = 0.;
+                    this.assetsTotalSizeInKb = 0.;
+                },
+                loadLargeAPI: function() {
+                    this.requestsPerMonth = 5000000.;
+                    this.averageExecutionTime = 100.;
+                    this.averageResponseSizeInKb = 0.3;
+                    this.assetsCount = 0.;
+                    this.assetsTotalSizeInKb = 0.;
+                },
+                loadSmallWebsite: function() {
+                    this.requestsPerMonth = 3000.;
+                    this.averageExecutionTime = 200.;
+                    this.averageResponseSizeInKb = 3.;
+                    this.assetsCount = 5.;
+                    this.assetsTotalSizeInKb = 200.;
+                },
+                loadLargeWebsite: function() {
+                    this.requestsPerMonth = 5000000.;
+                    this.averageExecutionTime = 300.;
+                    this.averageResponseSizeInKb = 3.;
+                    this.assetsCount = 5.;
+                    this.assetsTotalSizeInKb = 200.;
+                },
+            },
+            watch: {
+                requestsPerMonth: 'recalculate',
+                averageExecutionTime: 'recalculate',
+                averageResponseSizeInKb: 'recalculate',
+                assetsCount: 'recalculate',
+                assetsTotalSizeInKb: 'recalculate',
+            },
+        });
+    </script>
+
+</body>
+</html>
