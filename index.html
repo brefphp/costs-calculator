@@ -60,6 +60,32 @@
                 <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-indigo-500" id="averageResponseSizeInKb" type="number" v-model="averageResponseSizeInKb">
             </div>
         </div>
+        <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/2">
+                <label class="block text-gray-600 md:text-right pr-4" for="lambdaMemorySize">
+                    Lambda size
+                    <a class="ml-2" href="https://epsagon.com/blog/how-to-make-lambda-faster-memory-performance-benchmark/" target="_blank">
+                        <svg class="inline fill-current h-4 w-4 text-indigo-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg>
+                    </a>
+                </label>
+            </div>
+            <div class="md:w-1/2">
+                <div class="inline-block relative w-full">
+                    <select id="lambdaMemorySize" class="bg-gray-200 block appearance-none w-full border-2 border-gray-200 px-4 py-2 pr-8 text-gray-700 rounded leading-tight focus:outline-none focus:bg-white focus:border-indigo-500"
+                            v-model="lambdaMemorySize">
+                        <option value="128">128M</option>
+                        <option value="256">256M</option>
+                        <option value="512">512M</option>
+                        <option value="1024">1024M (recommended)</option>
+                        <option value="1792">1792M</option>
+                        <option value="2048">2048M</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <h2 class="my-4 text-xl">Assets</h2>
         <div class="md:flex md:items-center mb-6">
@@ -117,6 +143,7 @@
                 requestsPerMonth: 5000000.,
                 averageExecutionTime: 300.,
                 averageResponseSizeInKb: 3.,
+                lambdaMemorySize: 1024,
                 assetsCount: 5.,
                 assetsTotalSizeInKb: 200.,
 
@@ -147,7 +174,8 @@
                     const billedAverageExecutionTime = Math.max(100., this.averageExecutionTime);
 
                     const lambdaRequestsCost = this.requestsPerMonth * this.lambdaCostPerRequest;
-                    const lambdaTimeCost = this.requestsPerMonth * billedAverageExecutionTime * this.lambdaCostPer100ms / 100.;
+                    const lambdaCostPer100msForLambda = this.lambdaCostPer100ms * this.lambdaMemorySize / 1024.;
+                    const lambdaTimeCost = this.requestsPerMonth * billedAverageExecutionTime * lambdaCostPer100msForLambda / 100.;
                     this.lambdaTotal = lambdaRequestsCost + lambdaTimeCost;
 
                     const apiGatewayInvocationCosts = this.requestsPerMonth * this.apiGatewayCostPerMillion / 1000000.;
@@ -170,6 +198,7 @@
                     this.requestsPerMonth = 3000.;
                     this.averageExecutionTime = 100.;
                     this.averageResponseSizeInKb = 0.3;
+                    this.lambdaMemorySize = 1024;
                     this.assetsCount = 0.;
                     this.assetsTotalSizeInKb = 0.;
                 },
@@ -177,6 +206,7 @@
                     this.requestsPerMonth = 5000000.;
                     this.averageExecutionTime = 100.;
                     this.averageResponseSizeInKb = 0.3;
+                    this.lambdaMemorySize = 1024;
                     this.assetsCount = 0.;
                     this.assetsTotalSizeInKb = 0.;
                 },
@@ -184,6 +214,7 @@
                     this.requestsPerMonth = 3000.;
                     this.averageExecutionTime = 200.;
                     this.averageResponseSizeInKb = 3.;
+                    this.lambdaMemorySize = 1024;
                     this.assetsCount = 5.;
                     this.assetsTotalSizeInKb = 200.;
                 },
@@ -191,6 +222,7 @@
                     this.requestsPerMonth = 5000000.;
                     this.averageExecutionTime = 300.;
                     this.averageResponseSizeInKb = 3.;
+                    this.lambdaMemorySize = 1024;
                     this.assetsCount = 5.;
                     this.assetsTotalSizeInKb = 200.;
                 },
@@ -199,6 +231,7 @@
                 requestsPerMonth: 'recalculate',
                 averageExecutionTime: 'recalculate',
                 averageResponseSizeInKb: 'recalculate',
+                lambdaMemorySize: 'recalculate',
                 assetsCount: 'recalculate',
                 assetsTotalSizeInKb: 'recalculate',
             },
