@@ -109,6 +109,29 @@
             </div>
         </div>
 
+        <h2 class="my-4 text-xl">Database</h2>
+        <p class="my-2 text-gray-600">
+            Database prices can vary based on many factors. We offer very limited scenarios here.
+            <a class="ml-2" href="https://aws.amazon.com/rds/pricing/" target="_blank">
+                <svg class="inline fill-current h-4 w-4 text-indigo-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg>
+            </a>
+        </p>
+        <p class="my-2 text-gray-600">
+            <label>
+                <input class="mr-2" type="radio" v-model="database" value="0">
+                None
+            </label>
+        </p>
+        <p class="my-2 text-gray-600">
+            <label>
+                <input class="mr-2" type="radio" v-model="database" value="9.42">
+                Cheapest
+            </label>
+        </p>
+        <p class="my-2 ml-6 text-gray-600 text-sm">
+            MySQL db.t3.micro reserved instance ($9.42/m).
+        </p>
+
         <h2 class="my-4 text-xl">Monthly cost</h2>
         <p class="p-1 text-gray-700">
             AWS Lambda
@@ -126,9 +149,18 @@
             CloudFront
             <span class="float-right">${{ cloudFrontTotal.toFixed(2) }}</span>
         </p>
+        <p class="p-1 text-gray-700">
+            RDS database
+            <span class="float-right">${{ database }}</span>
+        </p>
         <p class="my-5 p-4 text-xl uppercase border-b border-b-2 border-indigo-500 bg-gray-100 text-gray-700">
             Total
             <span class="float-right font-bold">${{ total.toFixed(2) }}</span>
+        </p>
+
+        <p class="my-20 text-xl text-right">
+            Serverless costs calculator by
+            <a href="https://bref.sh/"><img src="bref.svg" alt="Bref" class="h-12 inline mb-3"></a>
         </p>
 
     </div>
@@ -146,6 +178,7 @@
                 lambdaMemorySize: 1024,
                 assetsCount: 5.,
                 assetsTotalSizeInKb: 200.,
+                database: 0,
 
                 lambdaCostPerRequest: 0.0000002,
                 lambdaCostPer100ms: 0.000001667,
@@ -192,7 +225,7 @@
                     this.cloudFrontTotal = cloudFrontPHPInvocationCosts + cloudFrontPHPDataTransferCosts
                         + cloudFrontAssetsInvocationCosts + cloudFrontAssetsDataTransferCosts;
 
-                    this.total = this.lambdaTotal + this.apiGatewayTotal + this.cloudFrontTotal;
+                    this.total = this.lambdaTotal + this.apiGatewayTotal + this.cloudFrontTotal + parseFloat(this.database);
                 },
                 loadSmallAPI: function() {
                     this.requestsPerMonth = 3000.;
@@ -234,6 +267,7 @@
                 lambdaMemorySize: 'recalculate',
                 assetsCount: 'recalculate',
                 assetsTotalSizeInKb: 'recalculate',
+                database: 'recalculate',
             },
         });
     </script>
