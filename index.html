@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Serverless cost estimator</title>
+    <title>Serverless costs calculator for AWS Lambda</title>
+    <meta name="description" content="Estimate AWS costs when running serverless applications on AWS Lambda." />
+    <meta property="og:title" content="Serverless costs calculator for AWS Lambda" />
+    <meta property="og:description" content="Estimate AWS costs when running serverless applications on AWS Lambda." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Serverless costs calculator" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Serverless costs calculator for AWS Lambda" />
+    <meta name="twitter:description" content="Estimate AWS costs when running serverless applications on AWS Lambda." />
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Montserrat|Rubik&display=swap" rel="stylesheet">
     <style>
@@ -19,7 +27,8 @@
 
     <div id="app" class="container mx-auto my-4 px-4 max-w-lg">
 
-        <h1 class="my-8 text-3xl sm:text-4xl">Serverless costs calculator</h1>
+        <h1 class="mt-8 mb-2 text-3xl sm:text-4xl">Serverless costs calculator</h1>
+        <p class="mb-8 text-gray-600 text-sm">Estimate AWS costs when running serverless applications on AWS Lambda.</p>
 
         <div class="my-8 flex flex-wrap">
             <button class="sm:flex-auto bg-indigo-500 hover:bg-indigo-400 text-white py-1 px-2 m-1 ml-0 border-b-4 border-indigo-700 hover:border-indigo-500 rounded" @click="loadSmallAPI()">Small API</button>
@@ -143,7 +152,7 @@
 
         <p class="my-20 text-xl text-right">
             Serverless costs calculator by
-            <a class="underline" href="https://bref.sh/">bref</a>.
+            <a class="underline" href="https://bref.sh/" title="Serverless PHP applications">bref</a>.
         </p>
 
     </div>
