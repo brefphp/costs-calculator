@@ -209,12 +209,17 @@
                     const s3InvocationCosts = pagesLoadedPerMonth * this.assetsCount * this.s3CostPer1000 / 1000.;
                     this.s3Total = s3InvocationCosts;
 
-                    const cloudFrontPHPInvocationCosts = this.requestsPerMonth * this.cloudFrontCostPer10000 / 10000.;
-                    const cloudFrontPHPDataTransferCosts = this.requestsPerMonth * this.averageResponseSizeInKb * this.cloudFrontDataTransferCostPerGb / 1024. / 1024.;
-                    const cloudFrontAssetsInvocationCosts = pagesLoadedPerMonth * this.assetsCount * this.cloudFrontCostPer10000 / 10000.;
-                    const cloudFrontAssetsDataTransferCosts = pagesLoadedPerMonth * this.assetsTotalSizeInKb * this.cloudFrontDataTransferCostPerGb / 1024. / 1024.;
-                    this.cloudFrontTotal = cloudFrontPHPInvocationCosts + cloudFrontPHPDataTransferCosts
-                        + cloudFrontAssetsInvocationCosts + cloudFrontAssetsDataTransferCosts;
+                    this.cloudFrontTotal = 0;
+
+                    // Only count CloudFront if assets are involved
+                    if (this.assetsCount > 0) {
+                        const cloudFrontPHPInvocationCosts = this.requestsPerMonth * this.cloudFrontCostPer10000 / 10000.;
+                        const cloudFrontPHPDataTransferCosts = this.requestsPerMonth * this.averageResponseSizeInKb * this.cloudFrontDataTransferCostPerGb / 1024. / 1024.;
+                        const cloudFrontAssetsInvocationCosts = pagesLoadedPerMonth * this.assetsCount * this.cloudFrontCostPer10000 / 10000.;
+                        const cloudFrontAssetsDataTransferCosts = pagesLoadedPerMonth * this.assetsTotalSizeInKb * this.cloudFrontDataTransferCostPerGb / 1024. / 1024.;
+                        this.cloudFrontTotal = cloudFrontPHPInvocationCosts + cloudFrontPHPDataTransferCosts
+                            + cloudFrontAssetsInvocationCosts + cloudFrontAssetsDataTransferCosts;
+                    }
 
                     this.total = this.lambdaTotal + this.apiGatewayTotal + this.cloudFrontTotal;
                 },
